@@ -1,5 +1,9 @@
 package Model;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Products {
    private long id ;
    private String name;
@@ -7,19 +11,21 @@ public class Products {
     private double price  ;
     private int stock  ;
     private String img ;
-    private boolean status ;
+    private List<String> imageUrls = new ArrayList< >();
+    private boolean status  =true;
 
     public Products() {
     }
 
-    public Products(long id, String name, String description, double price, int stock, String img, boolean status) {
+    public Products(long id, String name, String description, List<String> imageList, double price, int stock, String img ) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
         this.img = img;
-        this.status = status;
+        this.imageUrls = imageList;
+
     }
 
     public Products(int id, String name, String description, double price, int stock, String img   ) {
@@ -90,5 +96,13 @@ public class Products {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 }

@@ -13,4 +13,6 @@ public interface IServiceProducts<T, E> {
     void deleteBYe(E e);
 
     List<T> sortProducts();
+
+    List<T> addCart(T t);
 }

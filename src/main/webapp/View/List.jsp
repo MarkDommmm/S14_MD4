@@ -43,7 +43,7 @@
         <th scope="col">Số lượng kho</th>
         <th scope="col">Ảnh</th>
         <th scope="col">Trạng thái</th>
-        <th scope="col" colspan="2">Chức năng</th>
+        <th scope="col" colspan="3">Chức năng</th>
     </tr>
     </thead>
     <tbody>
@@ -54,16 +54,16 @@
             <td>${p.description}</td>
             <td>${p.price}$</td>
             <td>${p.stock}</td>
-            <td><a href="${p.img}" target="_blank">
-                <img style="width: 6rem" src="${p.img}">
+            <td width="150px"><a href="${p.img}" target="_blank">
+                <img width="100%" height="auto" src="<%=request.getContextPath()%>/img/${p.img}">
             </a></td>
             <td>${p.status ? "Còn Hàng" : "Hết Hàng"}</td>
-            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=EDIT&id=${p.id}">Edit</a></td>
-            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=DELETE&id=${p.id}">Delete</a></td>
+            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=ADDCART&id=${p.id}">Thêm giỏ hàng</a></td>
+            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=DETAIL&id=${p.id}">Chi tiết</a></td>
+            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=EDIT&id=${p.id}">Chỉnh sửa</a></td>
+            <td><a href="<%=request.getContextPath()%>/ProductsServlet?action=DELETE&id=${p.id}">xóa</a></td>
         </tr>
     </c:forEach>
-
-
     </tbody>
 </table>
 

@@ -2,30 +2,43 @@ import Database.ConnectDB;
 import Model.Products;
 import Service.ServiceProducts;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 @WebServlet(name = "ProductsServlet", value = "/ProductsServlet")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 1,
+        maxFileSize = 1024 * 1024 * 5,
+        maxRequestSize = 1024 * 1024 * 10
+)
 public class ProductsServlet extends HttpServlet {
     protected ServiceProducts serviceProducts;
 
     public void init() {
         serviceProducts = new ServiceProducts();
     }
+
     boolean check = false;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
         String action = request.getParameter("action");
-
+        System.out.println(action);
         if (action != null) {
             switch (action) {
                 case "GETALL":
@@ -35,7 +48,7 @@ public class ProductsServlet extends HttpServlet {
                     request.getRequestDispatcher("/View/newproduct.jsp").forward(request, response);
                     break;
                 case "DELETE":
-                    long id = Long.pasrseLong(request.getParameter("id"));
+                    long id = Long.parseLong(request.getParameter("id"));
                     serviceProducts.deleteBYe(id);
                     break;
                 case "EDIT":
@@ -53,6 +66,17 @@ public class ProductsServlet extends HttpServlet {
                     }
 
                     break;
+                case "DETAIL":
+                    Long idurl = Long.parseLong(request.getParameter("id"));
+                    Products p = serviceProducts.findById(idurl);
+                    request.setAttribute("products",p);
+                    request.getRequestDispatcher("/View/detailProduct.jsp").forward(request,response);
+                case "ADDCART":
+                    long idpro = Long.parseLong(request.getParameter("id"));
+                    String nameCart = request.getParameter("name");
+                    Double priceCart = Double.parseDouble(request.getParameter("price"));
+                    String imgCart = request.getParameter("img");
+                    System.out.println(idpro);
                 default:
                     break;
             }
@@ -72,14 +96,29 @@ public class ProductsServlet extends HttpServlet {
                     String des = request.getParameter("description");
                     Double price = Double.parseDouble(request.getParameter("price"));
                     int stock = Integer.parseInt(request.getParameter("stock"));
-                    String img = request.getParameter("img");
-                    Products newproduct = new Products(0, name, des, price, stock, img);
+
+                    Collection<Part> listimgURL = request.getParts();
+                    String avatar = "";
+                    String locationImg = "G:\\MD4\\Session14\\Class\\Class\\src\\main\\webapp\\img";
+
+                    List<String> listImageUrls =  new ArrayList<>();
+                    for (Part l : listimgURL) {
+                        if (l.getName().equals("img")) {
+                            l.write(locationImg + File.separator + l.getSubmittedFileName());
+                            avatar = l.getSubmittedFileName();
+                        } else if (l.getName().equals("imageUrls")) {
+                            l.write(locationImg +File.separator +l.getSubmittedFileName());
+                            listImageUrls.add(l.getSubmittedFileName());
+                        }
+
+                    }
+                    Products newproduct = new Products(0, name, des,listImageUrls, price, stock, avatar);
                     try {
                         serviceProducts.save(newproduct);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
-                    showProduct(serviceProducts.findAll(), request, response);
+
                     break;
                 case "UPDATE":
                     String idParam = request.getParameter("id");
@@ -100,11 +139,10 @@ public class ProductsServlet extends HttpServlet {
                             throw new RuntimeException(e);
                         }
                     }
-                    showProduct(serviceProducts.findAll(), request, response);
-                     break;
-                default:
-                     break;
+                    break;
+
             }
+            response.sendRedirect("/");
 
         }
     }

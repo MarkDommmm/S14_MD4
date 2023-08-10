@@ -42,7 +42,8 @@
     <input type="text" id="stock" name="stock" value="${productEdit.stock}">
     <br>
     <label for="img">Hình ảnh</label>
-    <textarea name="img" id="img" cols="30" rows="5">${productEdit.img}</textarea>
+    <input type="file" name="img" id="img" value="${productEdit.img}"  multiple>
+<%--    <textarea name="img" id="img" cols="30" rows="5">${productEdit.img}</textarea>--%>
     <br>
     <label>Trạng thái</label>
      ${productEdit.status ?"Còn Hàng" :"Hết Hàng"}

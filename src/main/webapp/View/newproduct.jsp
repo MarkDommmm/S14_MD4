@@ -11,7 +11,7 @@
     <title>Title</title>
 </head>
 <body>
-<form method="post" action="<%=request.getContextPath()%>/ProductsServlet">
+<form method="post" action="<%=request.getContextPath()%>/ProductsServlet" enctype="multipart/form-data">
     <label for="name">Nhập tên sản phẩm</label>
     <input type="text" id="name" name="name" >
 
@@ -25,7 +25,10 @@
     <input type="text" id="stock" name="stock">
 
     <label for="img">Hình ảnh</label>
-    <textarea name="img" id="img" ></textarea>
+    <input type="file" name="img" id="img"   >
+
+    <label for="imageUrls" >Hình ảnh</label>
+    <input type="file" name="imageUrls" id="imageUrls" multiple>
 
     <input type="submit" name="action" value="ADD">
 </form>

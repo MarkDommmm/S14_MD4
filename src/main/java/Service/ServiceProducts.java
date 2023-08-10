@@ -1,12 +1,10 @@
 package Service;
 
 import Database.ConnectDB;
+import Model.Cart;
 import Model.Products;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,13 +51,23 @@ public class ServiceProducts implements IServiceProducts<Products, Long> {
         Connection conn = ConnectDB.getConnection();
         try {
             if (products.getId() == 0) {
-                CallableStatement callst = conn.prepareCall("{Call add_product(?,?,?,?,?) }");
+                CallableStatement callst = conn.prepareCall("{Call add_product(?,?,?,?,?,?,?) }");
                 callst.setString(1, products.getName());
                 callst.setString(2, products.getDescription());
                 callst.setDouble(3, products.getPrice());
                 callst.setInt(4, products.getStock());
                 callst.setString(5, products.getImg());
-                callst.executeUpdate();
+                callst.setBoolean(6, products.isStatus());
+                callst.registerOutParameter(7, Types.INTEGER);
+                callst.execute();
+                Long newProId = callst.getLong(7);
+                for (String url : products.getImageUrls()) {
+                    CallableStatement call1 = conn.prepareCall("{Call insertIMG(?,?) }");
+                    call1.setString(1, url);
+                    call1.setLong(2, newProId);
+                    call1.executeUpdate();
+                }
+
             } else {
                 CallableStatement callst = conn.prepareCall("{Call update_products(?,?,?,?,?,?)}");
                 callst.setInt(1, (int) products.getId());
@@ -68,7 +76,6 @@ public class ServiceProducts implements IServiceProducts<Products, Long> {
                 callst.setDouble(4, products.getPrice());
                 callst.setInt(5, products.getStock());
                 callst.setString(6, products.getImg());
-
                 callst.executeUpdate();
             }
         } catch (SQLException ex) {
@@ -97,6 +104,13 @@ public class ServiceProducts implements IServiceProducts<Products, Long> {
                 p.setStatus(rs.getBoolean("status"));
 
             }
+            callst = conn.prepareCall("{CALL showimg(?)}");
+            callst.setLong(1, aLong);
+            ResultSet rs1 = callst.executeQuery();
+            while (rs1.next()) {
+                String url = rs1.getString("url");
+                p.getImageUrls().add(url);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -109,6 +123,9 @@ public class ServiceProducts implements IServiceProducts<Products, Long> {
     public void deleteBYe(Long aLong) {
         Connection conn = ConnectDB.getConnection();
         try {
+//            CallableStatement call = conn.prepareCall("{call deleteIMG(?)}");
+//            call.setLong(1, aLong);
+//            call.executeUpdate();
             CallableStatement callst = conn.prepareCall("{Call delete_product(?)}");
             callst.setLong(1, aLong);
             callst.executeUpdate();
@@ -146,6 +163,24 @@ public class ServiceProducts implements IServiceProducts<Products, Long> {
         }
         return list;
     }
+
+    @Override
+    public List<Products> addCart(Products products) {
+        Connection conn = ConnectDB.getConnection();
+        Cart c = null;
+        try {
+            CallableStatement call = conn.prepareCall("{Call addcart(?,?,?)}");
+            call.setInt(1, c.getIdproduct());
+            call.setInt(2, c.getQuantity());
+            call.setDouble(3, c.getPrice());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectDB.closeConnection(conn);
+        }
+        return null;
+    }
+
 
 
 }
